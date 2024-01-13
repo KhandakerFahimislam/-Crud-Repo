@@ -1,0 +1,121 @@
+﻿@model IEnumerable<Employee>
+@{
+    ViewData["Title"] = "Index";
+}
+
+<div class="row">
+    <div class="col-12">
+        <h4 class="text-center">Employee List</h4>
+        <div class="d-flex justify-content-end mb-1">
+            <a href="@Url.Action("Create", "Employees")" class="btn btn-outline-primary btn-sm">Create New</a>
+        </div>
+        <table class="table table-bordered table-striped">
+            <thead class="table table-bordered table-active">
+                <tr>
+                    <th></th>
+                    <th>Applicant Name</th>
+                    <th>Gender</th>
+                    <th>Expected Salary</th>
+                    <th>BirthDate</th>
+                    <th>  Ready to work anywhere in country </th>
+                    <th>Edit/Delete</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var a in Model)
+                {
+                    <tr>
+                        <td class="text-center" style="width:50px">
+                            <button type="button" class="btn btn-light btn-sm show-inventory"><i class="bi bi-chevron-right"></i></button>
+                            <button type="button" class="btn btn-light btn-sm hide-inventory" style="display:none"><i class="bi bi-chevron-down"></i></button>
+                        </td>
+                        <td>@a.Name</td>
+                        <td>@a.Gender</td>
+                        <td>@a.Salary</td>
+
+                        <td>@a.DoB.ToString("yyyy-MM-dd")</td>
+
+                        <td>@(a.IsActive ? "Yes" : "No")</td>
+                        <td>
+                            <a href="@Url.Action("Edit","Employees", new{id=a.EmployeeId})" class="btn btn-outline-success btn-sm">Edit</a>
+                            @*                             <a href="@Url.Action("Delete","Employees", new{id=a.EmployeeId})" class="btn btn-outline-danger btn-sm">Delete</a>
+                        *@
+                            <button data-pk="@a.EmployeeId" type="button" class="btn btn-danger btn-sm del">Delete</button>
+
+                        </td>
+                    </tr>
+                    <tr style="display:none">
+                        <td class="border-end-0"></td>
+                        <td colspan="7">
+                            <h4 class="text-center">Department</h4>
+                            <div style="max-height:150px; overflow-y:auto">
+                                <table class="table table-bordered table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Department Name</th>
+                                            <th>Number of Staff Work</th>
+
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var i in a.Departments)
+                                        {
+                                            <tr>
+                                                <td>@i.DepartmentName</td>
+                                                <td>@i.DepartmentMember</td>
+
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+@section styles
+{
+    <link href="~/libs/icons/font/bootstrap-icons.css" rel="stylesheet" />
+
+}
+@section scripts
+{
+    <script src="~/lib/jquery/dist/jquery.js"></script>
+    <script>
+        $(".del").click(function () {
+            if (!confirm('Are you sure to delete?')) return;
+            var btn = $(this);
+            let id = $(this).data("pk");
+            $.ajax({
+                type: "post",
+                url: "/Employees/Delete/" + id,
+                dataType: "json",
+                success: r => {
+                    if (r.success == true) {
+                        var ptr = btn.closest("tr");
+                        var str = ptr.next();
+                        ptr.remove();
+                        str.remove();
+                    }
+                }
+            })
+        })
+
+        $(".show-inventory").click(function () {
+            $(this).closest("tr").next().toggle();
+            $(this).toggle();
+            $(this).next().toggle();
+        });
+        $(".hide-inventory").click(function () {
+            $(this).closest("tr").next().toggle();
+            $(this).toggle();
+            $(this).prev().toggle();
+        });
+    </script>
+}
+
